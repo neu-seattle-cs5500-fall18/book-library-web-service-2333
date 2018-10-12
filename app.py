@@ -5,8 +5,8 @@ from werkzeug.contrib.fixers import ProxyFix
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Book Store API',
-    description='A simple Book Store API',
-)
+          description='A simple Book Store API',
+          )
 
 books = api.model('Book', {
     'id': fields.Integer(readOnly=True, description='The task unique identifier'),
@@ -50,27 +50,49 @@ DAO.create({'book_name': 'book3'})
 @api.route('/books')
 class BookStore(Resource):
     def get(self):
+        '''
+        Check all books in the library.
+        :rtype: List\<BookDAO\>
+        '''
         return DAO.books
 
     def post(self):
-        '''Create a new book'''
+        '''
+        Create a new book into the library.
+        :rtype: BookDAO
+        '''
         return DAO.create({'book_name': 'new book'}), 201
 
 
 @api.route('/book/<int:id>')
 class Book(Resource):
     def get(self, id):
+        '''
+        Check the book's info from the library.
+        :param id: book's id
+        :return: book's info
+        :rtype: BookDAO
+        '''
         return DAO.get(id)
 
     def delete(self, id):
-        '''Delete a book given its identifier'''
+        '''
+        Delete a book given its identifier
+        :param id: book's id
+        :return: None
+        :rtype: None
+        '''
         DAO.delete(id)
         return '', 204
 
     def put(self, id):
-        '''Update a book given its identifier'''
+        '''
+        Update a book given its identifier
+        :param id: book's id
+        :return: book's updated info
+        :rtype: BookDAO
+        '''
         return DAO.update(id, api.payload)
-
 
 
 if __name__ == '__main__':
