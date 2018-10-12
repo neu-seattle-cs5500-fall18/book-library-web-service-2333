@@ -1,15 +1,9 @@
-
-
-]
 *.DS_*
 # Packages
-*.egg
-*.egg-info
 dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -27,6 +21,4 @@ pip-log.txt
 
 #Mr Developer
 venv
-*.pyc
-build
-server.listen( port , () => console.log('Running'));
+.idea
