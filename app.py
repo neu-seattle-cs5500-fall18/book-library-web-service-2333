@@ -1,6 +1,8 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, jsonify
+from flask_restplus import Resource, Api
 
 app = Flask(__name__)
+api = Api(app)
 
 book_list = [
     {
@@ -18,28 +20,23 @@ book_list = [
 ]
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+@api.route('/books')
+class BookStore(Resource):
+    def get(Resource):
+        return book_list
 
-
-@app.route('/bookstore')
-def list_all_books():
-    return render_template('bookstore.html', book_list=book_list)
-
-
-@app.route('/book/<int:book_id>')
-def show_book(book_id):
-    book = None
-    for book_item in book_list:
-        if book_item['id'] == book_id:
-            book = book_item
-    return render_template('book.html', book=book)
-
-
-@app.route('/user/<int:user_id>')
-def show_user(user_id):
-    return 'User ID is %d' % user_id
+# @api.route('/book/<int:book_id>')
+# def show_book(book_id):
+#     book = None
+#     for book_item in book_list:
+#         if book_item['id'] == book_id:
+#             book = book_item
+#     return render_template('book.html', book=book)
+#
+#
+# @api.route('/user/<int:user_id>')
+# def show_user(user_id):
+#     return 'User ID is %d' % user_id
 
 
 if __name__ == '__main__':
