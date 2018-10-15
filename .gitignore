@@ -1,15 +1,9 @@
-
-
-]
 *.DS_*
 # Packages
-*.egg
-*.egg-info
 dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -22,11 +16,18 @@ pip-log.txt
 .coverage
 .tox
 
+# Python stuff #
+################
+*.pyc
+*.idea
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
 #Translations
 *.mo
 
 #Mr Developer
 venv
-*.pyc
-build
-server.listen( port , () => console.log('Running'));
+.idea
+env
