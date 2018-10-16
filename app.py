@@ -7,10 +7,17 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Book Store API',
           description='A simple Book Store API',
           )
+ns_book = api.namespace('books', description='BOOK operations')
+ns_user = api.namespace('users', description='USER operations')
 
 books = api.model('Book', {
-    'id': fields.Integer(readOnly=True, description='The task unique identifier'),
-    'book_name': fields.String(required=True, description='The task details')
+    'id': fields.Integer(readOnly=True, description='The book unique identifier'),
+    'book_name': fields.String(required=True, description='The book name')
+})
+
+users = api.model('User', {
+    'id': fields.Integer(readOnly=True, description='The user unique identifier'),
+    'username': fields.String(required=True, description='The username')
 })
 
 
@@ -41,30 +48,63 @@ class BookDAO(object):
         self.books.remove(book)
 
 
-DAO = BookDAO()
-DAO.create({'book_name': 'book1'})
-DAO.create({'book_name': 'book2'})
-DAO.create({'book_name': 'book3'})
+class UserDAO(object):
+    def __init__(self):
+        self.counter = 0
+        self.users = []
+
+    def get(self, id):
+        for user in self.users:
+            if user['id'] == id:
+                return user
+        api.abort(404, "Book {} doesn't exist".format(id))
+
+    def create(self, data):
+        user = data
+        user['id'] = self.counter = self.counter + 1
+        self.users.append(user)
+        return user
+
+    def update(self, id, data):
+        user = self.get(id)
+        user.update(data)
+        return user
+
+    def delete(self, id):
+        user = self.get(id)
+        self.users.remove(user)
 
 
-@api.route('/books')
+book_dao = BookDAO()
+book_dao.create({'book_name': 'book1'})
+book_dao.create({'book_name': 'book2'})
+book_dao.create({'book_name': 'book3'})
+
+user_dao = UserDAO()
+user_dao.create({'username': 'user1'})
+user_dao.create({'username': 'user2'})
+user_dao.create({'username': 'user3'})
+
+
+@ns_book.route('/books')
 class BookStore(Resource):
+    @ns_book.marshal_list_with(books)
     def get(self):
         '''
         Check all books in the library.
         :rtype: List\<BookDAO\>
         '''
-        return DAO.books
+        return book_dao.books
 
     def post(self):
         '''
         Create a new book into the library.
         :rtype: BookDAO
         '''
-        return DAO.create({'book_name': 'new book'}), 201
+        return book_dao.create({'book_name': 'new book'}), 201
 
 
-@api.route('/book/<int:id>')
+@ns_book.route('/book/<int:id>')
 class Book(Resource):
     def get(self, id):
         '''
@@ -73,7 +113,7 @@ class Book(Resource):
         :return: book's info
         :rtype: BookDAO
         '''
-        return DAO.get(id)
+        return book_dao.get(id)
 
     def delete(self, id):
         '''
@@ -82,7 +122,7 @@ class Book(Resource):
         :return: None
         :rtype: None
         '''
-        DAO.delete(id)
+        book_dao.delete(id)
         return '', 204
 
     def put(self, id):
@@ -92,7 +132,56 @@ class Book(Resource):
         :return: book's updated info
         :rtype: BookDAO
         '''
-        return DAO.update(id, api.payload)
+        return book_dao.update(id, {'book_name': 'new book name'})
+
+
+@ns_user.route('/users')
+class UserList(Resource):
+    @ns_user.marshal_list_with(users)
+    def get(self):
+        '''
+        Check all users in the user list.
+        :rtype: List\<UserDAO\>
+        '''
+        return user_dao.users
+
+    def post(self):
+        '''
+        Create a new user into the user list.
+        :rtype: UserDAO
+        '''
+        return user_dao.create({'username': 'new user'}), 201
+
+
+@ns_user.route('/user/<int:id>')
+class User(Resource):
+    def get(self, id):
+        '''
+        Check the user's info from the user list.
+        :param id: user's id
+        :return: user's info
+        :rtype: UserDAO
+        '''
+        return user_dao.get(id)
+
+    def delete(self, id):
+        '''
+        Delete a user given its identifier
+        :param id: user's id
+        :return: None
+        :rtype: None
+        '''
+        user_dao.delete(id)
+        return '', 204
+
+    def put(self, id):
+        '''
+        Update a user given its identifier
+        :param id: user's id
+        :return: user's updated info
+        :rtype: UserDAO
+        '''
+        return user_dao.update(id, {'username': 'new username'})
 
 
 if __name__ == '__main__':
