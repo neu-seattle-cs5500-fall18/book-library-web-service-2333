@@ -9,6 +9,7 @@ api = Api(app, version='1.0', title='Book Store API',
           )
 ns_book = api.namespace('books', description='BOOK operations')
 ns_user = api.namespace('users', description='USER operations')
+ns_borrow = api.namespace('borrows', description='BORROW operations')
 
 books = api.model('Book', {
     'id': fields.Integer(readOnly=True, description='The book unique identifier'),
@@ -18,6 +19,12 @@ books = api.model('Book', {
 users = api.model('User', {
     'id': fields.Integer(readOnly=True, description='The user unique identifier'),
     'username': fields.String(required=True, description='The username')
+})
+
+borrows = api.model('Borrow', {
+    'id': fields.Integer(readOnly=True, description='The borrow unique identifier'),
+    'book_id': fields.Integer(required=True, description='The book id'),
+    'user_id': fields.Integer(required=True, description='The user id')
 })
 
 
@@ -75,6 +82,33 @@ class UserDAO(object):
         self.users.remove(user)
 
 
+class BorrowDao(object):
+    def __init__(self):
+        self.counter = 0
+        self.borrows = []
+
+    def get(self, id):
+        for borrow in self.borrows:
+            if borrow['id'] == id:
+                return borrow
+        api.abort(404, "Borrow {} doesn't exist".format(id))
+
+    def create(self, data):
+        borrow = data
+        borrow['id'] = self.counter = self.counter + 1
+        self.borrows.append(borrow)
+        return borrow
+
+    def update(self, id, data):
+        borrow = self.get(id)
+        borrow.update(data)
+        return borrow
+
+    def delete(self, id):
+        borrow = self.get(id)
+        self.borrows.remove(borrow)
+
+
 book_dao = BookDAO()
 book_dao.create({'book_name': 'book1'})
 book_dao.create({'book_name': 'book2'})
@@ -84,6 +118,11 @@ user_dao = UserDAO()
 user_dao.create({'username': 'user1'})
 user_dao.create({'username': 'user2'})
 user_dao.create({'username': 'user3'})
+
+borrow_dao = BorrowDao()
+borrow_dao.create({'book_id': 1, 'user_id': 1})
+borrow_dao.create({'book_id': 2, 'user_id': 1})
+borrow_dao.create({'book_id': 3, 'user_id': 2})
 
 
 @ns_book.route('/books')
@@ -182,6 +221,55 @@ class User(Resource):
         :rtype: UserDAO
         '''
         return user_dao.update(id, {'username': 'new username'})
+
+
+@ns_borrow.route('/borrows')
+class BorrowList(Resource):
+    @ns_borrow.marshal_list_with(borrows)
+    def get(self):
+        '''
+        Check all borrows in the library.
+        :rtype: List\<BorrowDAO\>
+        '''
+        return borrow_dao.borrows
+
+    def post(self):
+        '''
+        Create a new borrow into the library.
+        :rtype: BorrowDAO
+        '''
+        return borrow_dao.create(api.payload), 201
+
+
+@ns_borrow.route('/borrow/<int:id>')
+class Borrow(Resource):
+    def get(self, id):
+        '''
+        Check the borrow's info from the library.
+        :param id: borrow's id
+        :return: borrow's info
+        :rtype: BorrowDAO
+        '''
+        return borrow_dao.get(id)
+
+    def delete(self, id):
+        '''
+        Delete a borrow given its identifier
+        :param id: borrow's id
+        :return: None
+        :rtype: None
+        '''
+        borrow_dao.delete(id)
+        return '', 204
+
+    def put(self, id):
+        '''
+        Update a borrow given its identifier
+        :param id: borrow's id
+        :return: borrow's updated info
+        :rtype: BorrowDAO
+        '''
+        return borrow_dao.update(id, api.payload)
 
 
 if __name__ == '__main__':
