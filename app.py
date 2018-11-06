@@ -5,8 +5,7 @@ from werkzeug.contrib.fixers import ProxyFix
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='Book Store API',
-          description='A simple Book Store API',
-          )
+          description='A simple Book Store API')
 ns_book = api.namespace('books', description='BOOK operations')
 ns_user = api.namespace('users', description='USER operations')
 ns_borrow = api.namespace('borrows', description='BORROW operations')
