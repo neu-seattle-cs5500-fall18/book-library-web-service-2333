@@ -29,5 +29,5 @@ __pycache__/
 
 #Mr Developer
 venv
-.idea
 env
+book-library/node_modules

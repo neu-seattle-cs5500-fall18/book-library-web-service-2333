@@ -3,7 +3,9 @@ from api import api
 from models import db
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://dbuser:dbpassword@mydb.cjmm694bjqke.us-west-1.rds.amazonaws.com/msd'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://dbuser:dbpassword@mydb.cjmm694bjqke.us-west-1.rds.amazonaws.com/msd'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:jef940727,@localhost/msd'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db.init_app(app)

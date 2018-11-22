@@ -22,7 +22,8 @@ class User(db.Model):
         self.password = password
 
     def to_json(self):
-        return json.dumps({'user_id': self.user_id, 'username': self.username})
+        return json.dumps({'user_id': self.user_id, 'username': self.username,
+                           'password': self.password})
 
 
 class Book(db.Model):
@@ -37,7 +38,7 @@ class Book(db.Model):
         self.publish_date = publish_date
 
     def to_json(self):
-        return json.dumps({'book_name': self.book_name, 'author': self.author,
+        return json.dumps({'book_id': self.book_id, 'book_name': self.book_name, 'author': self.author,
                            'publish_date': self.publish_date}, default=datetime_handler)
 
 
