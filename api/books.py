@@ -52,7 +52,7 @@ class BookIndividual(Resource):
         '''
         book = Book.query.filter_by(book_id=book_id).first()
         if book is not None:
-            data = json.dumps({'book_name': book.book_name, 'author': book.author,
+            data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
                                'publish_date': book.publish_date}, default=datetime_handler)
             response = jsonify(data)
             response.status_code = 201
@@ -98,7 +98,7 @@ class BookIndividual(Resource):
         if publish_date is not None:
             book.publish_date = publish_date
         db.session.commit()
-        data = json.dumps({'book_name': book.book_name, 'author': book.author,
+        data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
                            'publish_date': book.publish_date}, default=datetime_handler)
         response = jsonify(data)
         response.status_code = 201
