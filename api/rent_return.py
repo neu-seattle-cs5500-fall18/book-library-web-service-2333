@@ -1,6 +1,7 @@
 from flask import Response, jsonify
 from flask_restplus import Namespace, Resource, reqparse
 from models import *
+from datetime import datetime
 
 api = Namespace('rent_return', description='RENT and RETURN operations')
 
@@ -41,8 +42,13 @@ class RentUser(Resource):
         :return: a list of RentReturn record
         :rtype: List\<RentReturn\>
         """
-        records = RentReturn.query.filter_by(user_id=user_id)
-        response = [record.to_json() for record in records]
+        records = db.session.query(RentReturn, Book).filter(RentReturn.user_id == user_id).filter(
+            RentReturn.book_id == Book.book_id).all()
+        response = [json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
+                                'publish_date': book.publish_date, 'available': book.available,
+                                'status': rent_return.status, 'rent_date': rent_return.rent_date,
+                                'return_date': rent_return.return_date}, default=datetime_handler) for rent_return, book
+                    in records]
         return Response(json.dumps(response), mimetype='application/json', status=201)
 
 
@@ -64,7 +70,9 @@ class RentBook(Resource):
         :rtype: RentReturn
         '''
         args = parser.parse_args()
-        rent_date = args['rent_date']
+        date_string = datetime.fromtimestamp(int(args['rent_date']) / 1000).strftime(
+            "%Y-%m-%d")
+        rent_date = datetime.strptime(date_string, "%Y-%m-%d")
 
         book = Book.query.filter_by(book_id=book_id).first()
         if not book.available:
@@ -91,7 +99,10 @@ class RentBook(Resource):
         :rtype: RentReturn
         '''
         args = parser.parse_args()
-        return_date = args['return_date']
+        date_string = datetime.fromtimestamp(int(args['return_date']) / 1000).strftime(
+            "%Y-%m-%d")
+        return_date = datetime.strptime(date_string, "%Y-%m-%d")
+
         if return_date is None:
             return None, 402
         record = RentReturn.query.filter_by(user_id=user_id, book_id=book_id).first()
