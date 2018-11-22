@@ -34,10 +34,37 @@ export const getBooks = () => {
 };
 
 export const rentABook = (user_id, book_id, rent_date) => {
-    let url = '/rent_return' + user_id + book_id;
+    let url = '/rent_return/' + user_id + '/' + book_id;
     return fetch(url, {
         method: "POST",
         body: JSON.stringify({rent_date}),
+        headers: new Headers({'content-type': 'application/json'}),
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(response.statusText);
+            }
+        });
+};
+
+export const getRentBooks = (user_id) => {
+    let url = '/rent_return/' + user_id;
+    return fetch(url)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error(response.statusText);
+        });
+};
+
+export const returnABook = (user_id, book_id, return_date) => {
+    let url = '/rent_return/' + user_id + '/' + book_id;
+    return fetch(url, {
+        method: "PUT",
+        body: JSON.stringify({return_date}),
         headers: new Headers({'content-type': 'application/json'}),
     })
         .then(response => {

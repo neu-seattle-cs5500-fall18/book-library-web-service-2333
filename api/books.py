@@ -12,6 +12,9 @@ parser.add_argument('publish_date', help='The publish date of book')
 
 @api.route('')
 class BookStore(Resource):
+    @api.doc(responses={
+        201: 'Success',
+    })
     @api.doc('get all books')
     def get(self):
         '''
@@ -22,6 +25,9 @@ class BookStore(Resource):
         response = [book.to_json() for book in query_record]
         return Response(json.dumps(response), mimetype='application/json', status=201)
 
+    @api.doc(responses={
+        201: 'Success',
+    })
     @api.doc('create a new book')
     def post(self):
         '''
@@ -42,6 +48,10 @@ class BookStore(Resource):
 @api.route('/<int:book_id>')
 @api.param('book_id', 'The book identifier')
 class BookIndividual(Resource):
+    @api.doc(responses={
+        201: 'Success',
+        404: 'No such book'
+    })
     @api.doc('get a book from its id')
     def get(self, book_id):
         '''
@@ -53,13 +63,18 @@ class BookIndividual(Resource):
         book = Book.query.filter_by(book_id=book_id).first()
         if book is not None:
             data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
-                               'publish_date': book.publish_date}, default=datetime_handler)
+                               'publish_date': book.publish_date, 'available': book.available},
+                              default=datetime_handler)
             response = jsonify(data)
             response.status_code = 201
             return response
         else:
             return None, 404
 
+    @api.doc(responses={
+        204: 'Success',
+        404: 'No such book'
+    })
     @api.doc('delete a book by its id')
     def delete(self, book_id):
         '''
@@ -76,6 +91,10 @@ class BookIndividual(Resource):
         else:
             return None, 404
 
+    @api.doc(responses={
+        201: 'Success',
+        404: 'No such book'
+    })
     @api.doc('update a book by its id')
     def put(self, book_id):
         '''
@@ -99,7 +118,7 @@ class BookIndividual(Resource):
             book.publish_date = publish_date
         db.session.commit()
         data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
-                           'publish_date': book.publish_date}, default=datetime_handler)
+                           'publish_date': book.publish_date, 'available': book.available}, default=datetime_handler)
         response = jsonify(data)
         response.status_code = 201
         return response

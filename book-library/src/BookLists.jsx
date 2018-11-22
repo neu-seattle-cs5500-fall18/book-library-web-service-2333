@@ -1,18 +1,26 @@
 import React from 'react';
-import BookList from './BookList';
+import BookLine from './BookLine';
 
 const BookLists = ({books, rentBook}) => {
-    const allBooks = books.map((book) => (
-        <li key={book.book_id}>
-            <BookList book_name={book.book_name} author={book.author} publish_date={book.publish_date}/>
-            <button onClick={rentBook(book.book_id)}>Rent</button>
-        </li>
+    const allBooks = books.map((book, index) => (
+        <BookLine key={index} book_id={book.book_id} book_name={book.book_name} author={book.author}
+                  publish_date={book.publish_date}
+                  available={book.available} rentBook={rentBook}/>
     ));
     return (
-        <div className="book-list">
-            <ul className="book-line">
-                {allBooks}
-            </ul>
+        <div>
+            <h1>All Books</h1>
+            <table className="book-list">
+                <thead>
+                <tr>
+                    <th>Book_Name</th>
+                    <th>Author</th>
+                    <th>Publish_Date</th>
+                    <th>Available</th>
+                </tr>
+                </thead>
+                <tbody>{allBooks}</tbody>
+            </table>
         </div>
     );
 };

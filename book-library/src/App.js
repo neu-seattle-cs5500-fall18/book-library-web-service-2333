@@ -4,7 +4,8 @@ import Login from './Login';
 import Register from './Register'
 import Loggedin from './Loggedin';
 import BookLists from './BookLists';
-import {getUsers, postUsers, getBooks, rentABook} from './service';
+import ReturnLists from './ReturnLists';
+import {getUsers, postUsers, getBooks, rentABook, getRentBooks, returnABook} from './service';
 
 class App extends Component {
 
@@ -18,7 +19,8 @@ class App extends Component {
             loginPassword: '',
             registerUsername: '',
             registerPassword: '',
-            books: []
+            books: [],
+            rentRecords: []
         };
         this.onLoginUsername = this.onLoginUsername.bind(this);
         this.onLoginPassword = this.onLoginPassword.bind(this);
@@ -29,6 +31,10 @@ class App extends Component {
         this.onLogin = this.onLogin.bind(this);
         this.onRegister = this.onRegister.bind(this);
         this.onLogout = this.onLogout.bind(this);
+        this.rentBook = this.rentBook.bind(this);
+        this.returnBook = this.returnBook.bind(this);
+        this.getAllBooks = this.getAllBooks.bind(this);
+        this.getAllRentBooks = this.getAllRentBooks.bind(this);
     }
 
     onLoginUsername(e) {
@@ -93,6 +99,10 @@ class App extends Component {
                         user_id: user.user_id
                     });
                 })
+                .then(() => {
+                    this.getAllBooks();
+                    this.getAllRentBooks();
+                })
                 .catch(err => console.log(err.message));
         }
     }
@@ -112,20 +122,16 @@ class App extends Component {
                 .then(() => {
                     postUsers({username: this.state.registerUsername, password: this.state.registerPassword})
                 })
-                .then(() => {
+                .then((user_id) => {
                     this.setState({
                         currentUser: this.state.registerUsername,
-                        isLogin: true
+                        isLogin: true,
+                        user_id: user_id
                     });
                 })
                 .then(() => {
-                    getUsers()
-                        .then((users) => {
-                            let user = users.filter(user => JSON.parse(user).username === this.state.currentUser);
-                            this.setState({
-                                user_id: user.user_id
-                            })
-                        })
+                    this.getAllBooks();
+                    this.getAllRentBooks();
                 })
                 .catch(err => console.log(err.message));
         }
@@ -154,11 +160,24 @@ class App extends Component {
 
     rentBook(book_id) {
         rentABook(this.state.user_id, book_id, Date.now())
-            .then(alert("success!"))
+            .then(this.getAllBooks)
+            .then(this.getAllRentBooks);
     }
 
-    componentDidMount() {
-        this.getAllBooks();
+    getAllRentBooks() {
+        getRentBooks(this.state.user_id)
+            .then((books) => {
+                books = books.map((book) => (JSON.parse(book)));
+                this.setState({
+                    rentRecords: books
+                })
+            })
+    }
+
+    returnBook(book_id) {
+        returnABook(this.state.user_id, book_id, Date.now())
+            .then(this.getAllBooks)
+            .then(this.getAllRentBooks);
     }
 
     render() {
@@ -196,6 +215,9 @@ class App extends Component {
                         books={this.state.books}
                         rentBook={this.rentBook}
                     />
+                    <ReturnLists
+                        books={this.state.rentRecords}
+                        returnBook={this.returnBook}/>
                 </div>}
             </div>
         );
