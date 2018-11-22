@@ -11,6 +11,9 @@ parser.add_argument('password', help='The password of the user')
 
 @api.route('')
 class UserList(Resource):
+    @api.doc(responses={
+        201: 'Success',
+    })
     @api.doc('get all users')
     def get(self):
         '''
@@ -21,6 +24,9 @@ class UserList(Resource):
         response = [user.to_json() for user in query_record]
         return Response(json.dumps(response), mimetype='application/json', status=201)
 
+    @api.doc(responses={
+        201: 'Success',
+    })
     @api.doc('create a new user')
     def post(self):
         '''
@@ -39,6 +45,10 @@ class UserList(Resource):
 
 @api.route('/<int:user_id>')
 class UserIndividual(Resource):
+    @api.doc(responses={
+        201: 'Success',
+        404: 'No such user'
+    })
     @api.doc('get a user from its id')
     def get(self, user_id):
         '''
@@ -56,6 +66,10 @@ class UserIndividual(Resource):
         else:
             return None, 404
 
+    @api.doc(responses={
+        204: 'Success',
+        404: 'No such user'
+    })
     @api.doc('delete a user by its id')
     def delete(self, user_id):
         '''
@@ -72,6 +86,10 @@ class UserIndividual(Resource):
         else:
             return None, 404
 
+    @api.doc(responses={
+        201: 'Success',
+        404: 'No such user'
+    })
     @api.doc('update a user by its id')
     def put(self, user_id):
         '''

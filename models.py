@@ -31,20 +31,23 @@ class Book(db.Model):
     book_name = db.Column(db.String(100), unique=True, nullable=False)
     author = db.Column(db.String(100), unique=False, nullable=False)
     publish_date = db.Column(db.Date, unique=False, nullable=False)
+    available = db.Column(db.Boolean, unique=False, nullable=False)
 
     def __init__(self, name, author, publish_date):
         self.book_name = name
         self.author = author
         self.publish_date = publish_date
+        self.available = True
 
     def to_json(self):
         return json.dumps({'book_id': self.book_id, 'book_name': self.book_name, 'author': self.author,
-                           'publish_date': self.publish_date}, default=datetime_handler)
+                           'publish_date': self.publish_date, 'available': self.available}, default=datetime_handler)
 
 
 class RentReturn(db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey(Book.book_id), unique=True, nullable=False)
+    record_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), unique=False, nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey(Book.book_id), unique=False, nullable=False)
     status = db.Column(db.Enum('RENT', 'RETURN'), unique=False, nullable=False)
     rent_date = db.Column(db.Date, unique=False, nullable=False)
     return_date = db.Column(db.Date, unique=False, nullable=True)
@@ -54,7 +57,7 @@ class RentReturn(db.Model):
         self.book_id = book_id
         self.status = 'RENT'
         self.rent_date = rent_date
-        # self.return_date = None
+        self.return_date = None
 
     def to_json(self):
         return json.dumps({'user_id': self.user_id, 'book_id': self.book_id,
