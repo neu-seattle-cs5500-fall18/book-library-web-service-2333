@@ -4,10 +4,7 @@ import ReturnLine from './ReturnLine';
 const ReturnLists = ({books, returnBook}) => {
     const allBooks = books.map((book, index) => (
         <ReturnLine key={index} book_id={book.book_id} book_name={book.book_name} author={book.author}
-                    publish_date={book.publish_date} available={book.available} status={book.status}
-                    rent_date={book.rent_date}
-                    return_date={book.return_date}
-                    returnBook={returnBook}/>
+                    genre={book.genre} rent_date={book.rent_date} returnBook={returnBook}/>
     ));
     return (
         <div>
@@ -17,11 +14,8 @@ const ReturnLists = ({books, returnBook}) => {
                 <tr>
                     <th>Book_Name</th>
                     <th>Author</th>
-                    <th>Publish_Date</th>
-                    <th>Available</th>
-                    <th>Status</th>
+                    <th>Genre</th>
                     <th>Rent_Date</th>
-                    <th>Return_Date</th>
                 </tr>
                 </thead>
                 <tbody>{allBooks}</tbody>

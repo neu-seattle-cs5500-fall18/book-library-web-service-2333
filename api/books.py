@@ -7,7 +7,7 @@ api = Namespace('books', description='BOOK operations')
 parser = reqparse.RequestParser()
 parser.add_argument('book_name', help='The name of the book')
 parser.add_argument('author', help='The author of the book')
-parser.add_argument('publish_date', help='The publish date of book')
+parser.add_argument('genre', help='The genre of book')
 
 
 @api.route('')
@@ -37,9 +37,9 @@ class BookStore(Resource):
         args = parser.parse_args()
         book_name = args['book_name']
         author = args['author']
-        publish_date = args['publish_date']
+        genre = args['genre']
 
-        new_book = Book(book_name, author, publish_date)
+        new_book = Book(book_name, author, genre)
         db.session.add(new_book)
         db.session.commit()
         return Response(new_book.to_json(), mimetype='application/json', status=201)
@@ -63,8 +63,7 @@ class BookIndividual(Resource):
         book = Book.query.filter_by(book_id=book_id).first()
         if book is not None:
             data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
-                               'publish_date': book.publish_date, 'available': book.available},
-                              default=datetime_handler)
+                               'genre': book.genre, 'available': book.available})
             response = jsonify(data)
             response.status_code = 201
             return response
@@ -106,7 +105,7 @@ class BookIndividual(Resource):
         args = parser.parse_args()
         book_name = args['book_name']
         author = args['author']
-        publish_date = args['publish_date']
+        genre = args['genre']
         book = Book.query.filter_by(book_id=book_id).first()
         if book is None:
             return None, 404
@@ -114,11 +113,11 @@ class BookIndividual(Resource):
             book.book_name = book_name
         if author is not None:
             book.author = author
-        if publish_date is not None:
-            book.publish_date = publish_date
+        if genre is not None:
+            book.genre = genre
         db.session.commit()
         data = json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
-                           'publish_date': book.publish_date, 'available': book.available}, default=datetime_handler)
+                           'genre': book.genre, 'available': book.available})
         response = jsonify(data)
         response.status_code = 201
         return response
