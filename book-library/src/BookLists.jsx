@@ -4,7 +4,7 @@ import BookLine from './BookLine';
 const BookLists = ({books, rentBook}) => {
     const allBooks = books.map((book, index) => (
         <BookLine key={index} book_id={book.book_id} book_name={book.book_name} author={book.author}
-                  publish_date={book.publish_date}
+                  genre={book.genre}
                   available={book.available} rentBook={rentBook}/>
     ));
     return (
@@ -15,7 +15,7 @@ const BookLists = ({books, rentBook}) => {
                 <tr>
                     <th>Book_Name</th>
                     <th>Author</th>
-                    <th>Publish_Date</th>
+                    <th>Genre</th>
                     <th>Available</th>
                 </tr>
                 </thead>

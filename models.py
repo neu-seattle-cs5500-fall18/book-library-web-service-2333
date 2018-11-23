@@ -2,14 +2,13 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 import datetime
 
+db = SQLAlchemy()
+
 
 def datetime_handler(x):
-    if isinstance(x, datetime.date):
+    if isinstance(x, datetime.datetime):
         return x.isoformat()
     raise TypeError("Unknown type")
-
-
-db = SQLAlchemy()
 
 
 class User(db.Model):
@@ -30,18 +29,18 @@ class Book(db.Model):
     book_id = db.Column(db.Integer, primary_key=True)
     book_name = db.Column(db.String(100), unique=True, nullable=False)
     author = db.Column(db.String(100), unique=False, nullable=False)
-    publish_date = db.Column(db.Date, unique=False, nullable=False)
+    genre = db.Column(db.String(100), unique=False, nullable=False)
     available = db.Column(db.Boolean, unique=False, nullable=False)
 
-    def __init__(self, name, author, publish_date):
+    def __init__(self, name, author, genre):
         self.book_name = name
         self.author = author
-        self.publish_date = publish_date
+        self.genre = genre
         self.available = True
 
     def to_json(self):
         return json.dumps({'book_id': self.book_id, 'book_name': self.book_name, 'author': self.author,
-                           'publish_date': self.publish_date, 'available': self.available}, default=datetime_handler)
+                           'genre': self.genre, 'available': self.available})
 
 
 class RentReturn(db.Model):
@@ -49,8 +48,8 @@ class RentReturn(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), unique=False, nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey(Book.book_id), unique=False, nullable=False)
     status = db.Column(db.Enum('RENT', 'RETURN'), unique=False, nullable=False)
-    rent_date = db.Column(db.Date, unique=False, nullable=False)
-    return_date = db.Column(db.Date, unique=False, nullable=True)
+    rent_date = db.Column(db.DateTime, unique=False, nullable=False)
+    return_date = db.Column(db.DateTime, unique=False, nullable=True)
 
     def __init__(self, user_id, book_id, rent_date):
         self.user_id = user_id

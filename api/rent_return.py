@@ -34,7 +34,7 @@ class RentUser(Resource):
     @api.doc(responses={
         201: 'Success',
     })
-    @api.doc('get all books the user borrows and returns')
+    @api.doc('get all books the user has not return')
     def get(self, user_id):
         """
         Get all books the user borrows and returns.
@@ -43,11 +43,10 @@ class RentUser(Resource):
         :rtype: List\<RentReturn\>
         """
         records = db.session.query(RentReturn, Book).filter(RentReturn.user_id == user_id).filter(
-            RentReturn.book_id == Book.book_id).all()
+            RentReturn.book_id == Book.book_id).filter(RentReturn.status == 'RENT').all()
         response = [json.dumps({'book_id': book.book_id, 'book_name': book.book_name, 'author': book.author,
-                                'publish_date': book.publish_date, 'available': book.available,
-                                'status': rent_return.status, 'rent_date': rent_return.rent_date,
-                                'return_date': rent_return.return_date}, default=datetime_handler) for rent_return, book
+                                'genre': book.genre, 'rent_date': rent_return.rent_date},
+                               default=datetime_handler) for rent_return, book
                     in records]
         return Response(json.dumps(response), mimetype='application/json', status=201)
 
@@ -71,8 +70,8 @@ class RentBook(Resource):
         '''
         args = parser.parse_args()
         date_string = datetime.fromtimestamp(int(args['rent_date']) / 1000).strftime(
-            "%Y-%m-%d")
-        rent_date = datetime.strptime(date_string, "%Y-%m-%d")
+            "%Y-%m-%d %H:%M:%S")
+        rent_date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
         book = Book.query.filter_by(book_id=book_id).first()
         if not book.available:
@@ -100,17 +99,16 @@ class RentBook(Resource):
         '''
         args = parser.parse_args()
         date_string = datetime.fromtimestamp(int(args['return_date']) / 1000).strftime(
-            "%Y-%m-%d")
-        return_date = datetime.strptime(date_string, "%Y-%m-%d")
+            "%Y-%m-%d %H:%M:%S")
+        return_date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
         if return_date is None:
             return None, 402
-        record = RentReturn.query.filter_by(user_id=user_id, book_id=book_id).first()
+        record = RentReturn.query.filter_by(user_id=user_id, book_id=book_id, return_date=None).first()
         if record is None:
             return None, 401
-        if return_date is not None:
-            record.return_date = return_date
-            record.status = 'RETURN'
+        record.return_date = return_date
+        record.status = 'RETURN'
         book = Book.query.filter_by(book_id=book_id).first()
         book.available = True
         db.session.commit()
