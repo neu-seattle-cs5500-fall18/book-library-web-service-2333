@@ -27,6 +27,4 @@ __pycache__/
 *.mo
 
 #Mr Developer
-venv
-env
 book-library/node_modules
