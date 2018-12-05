@@ -122,16 +122,12 @@ class App extends Component {
                 .then(() => {
                     postUsers({username: this.state.registerUsername, password: this.state.registerPassword})
                 })
-                .then((user_id) => {
-                    this.setState({
-                        currentUser: this.state.registerUsername,
-                        isLogin: true,
-                        user_id: user_id
-                    });
-                })
                 .then(() => {
-                    this.getAllBooks();
-                    this.getAllRentBooks();
+                    alert("Registration success!");
+                    this.setState({
+                        registerUsername: '',
+                        registerPassword: ''
+                    })
                 })
                 .catch(err => console.log(err.message));
         }
